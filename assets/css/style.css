@@ -1,0 +1,11 @@
+.bg-gray {
+    background-color: #808080;
+}
+
+.center {
+    display: block;
+    margin-top: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%; 
+  }
