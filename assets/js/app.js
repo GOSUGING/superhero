@@ -100,7 +100,7 @@ $(document).ready(function(){
 
                 
                 heroResult.html(`<div class="card">
-                    <img src="${myHero.image}" alt="" class="card-img-top">
+                    <img src="${myHero.image}" alt="" class="card-img-top" style="max-width: 50%; height: auto;">
                     <div class="card-body">
                         <h5>Nombre: ${myHero.name}</h5>
                     </div>
@@ -113,6 +113,7 @@ $(document).ready(function(){
                         <li class="list-group-item">Alianza: ${myHero.groupaffiliation}</li>
                     </ul>
                 </div>`);
+
             },
             error(xhr, status, error) {
                 console.error('Error al obtener datos de la API:', error);

@@ -1,3 +1,10 @@
+body {
+    margin: 20px; 
+    overflow-y: scroll;
+    min-height: 2000px;
+    margin: 0;
+    padding: 0; 
+}
 .bg-gray {
     background-color: #808080;
 }
@@ -8,4 +15,12 @@
     margin-left: auto;
     margin-right: auto;
     width: 50%; 
-  }
+}
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    margin: 0; 
+    padding: 0; 
+}
