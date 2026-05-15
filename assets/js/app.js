@@ -1,7 +1,8 @@
-$(document).ready(function(){
+$(document).ready(function () {
     const heroForm = $('#heroForm');
     const heroNumber = $('#heroNumber');
     const heroResult = $('#heroResult');
+    const chartWrapper = $('#chartWrapper');
     let myChart = null;
 
     heroForm.on('submit', function (event) {
@@ -10,36 +11,168 @@ $(document).ready(function(){
         searchHero();
     });
 
-    $('#searchAgainBtn').on('click', function() {
-        heroResult.empty();
-        searchHero();
-    });
-
     const searchHero = () => {
-        const heroNumberUser = parseInt(heroNumber.val());
-
-        if (!isNaN(heroNumberUser)) {
-            if (heroNumberUser > 0 && heroNumberUser <= 731) {
-                heroNumber.addClass('is-valid');
-                getHero(heroNumberUser);
-            } else {
-                alert('Por favor, ingrese un número entre 1 y 731.');
-                heroNumber.addClass('is-invalid');
-            }
-        } else {
-            alert('Por favor, ingrese un número válido.');
+        const val = parseInt(heroNumber.val());
+        if (isNaN(val) || val < 1 || val > 731) {
             heroNumber.addClass('is-invalid');
+            return;
         }
+        heroNumber.addClass('is-valid');
+        getHero(val);
+    };
+
+    const parseStatValue = (v) => {
+        const n = parseInt(v);
+        return isNaN(n) ? 0 : Math.min(n, 100);
+    };
+
+    const getStatColor = (value) => {
+        if (value >= 80) return '#e63946';
+        if (value >= 55) return '#f4d03f';
+        if (value >= 30) return '#2ecc71';
+        return '#3498db';
+    };
+
+    const renderPowerBars = (stats) => {
+        return Object.entries(stats).map(([key, val]) => {
+            const num = parseStatValue(val);
+            const display = parseInt(val) >= 0 ? parseInt(val) : 'N/A';
+            const color = getStatColor(num);
+            return `
+                <div class="stat-bar">
+                    <div class="stat-bar-header">
+                        <span class="stat-bar-label">${key}</span>
+                        <span class="stat-bar-value">${display}</span>
+                    </div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width:${num}%; background:${color};"></div>
+                    </div>
+                </div>`;
+        }).join('');
+    };
+
+    const renderCard = (hero) => {
+        const height = Array.isArray(hero.height) ? (hero.height[1] || hero.height[0] || 'N/A') : hero.height;
+        const weight = Array.isArray(hero.weight) ? (hero.weight[1] || hero.weight[0] || 'N/A') : hero.weight;
+        const publisherBadge = hero.publisher
+            ? `<span class="hero-publisher-badge">${hero.publisher}</span>` : '';
+
+        return `
+        <div class="hero-card">
+            <div class="hero-image-wrapper">
+                <img src="${hero.image}" alt="${hero.name}" onerror="this.src='assets/img/sh2.jpg'">
+                <div class="hero-image-overlay">
+                    <h2 class="hero-name">${hero.name}</h2>
+                    ${publisherBadge}
+                </div>
+            </div>
+            <div class="hero-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Ocupación</span>
+                        <span class="info-value" title="${hero.occupation}">${hero.occupation || 'N/A'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Primera aparición</span>
+                        <span class="info-value" title="${hero.firstappearance}">${hero.firstappearance || 'N/A'}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Altura</span>
+                        <span class="info-value">${height}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Peso</span>
+                        <span class="info-value">${weight}</span>
+                    </div>
+                    <div class="info-item info-full">
+                        <span class="info-label">Afiliación</span>
+                        <span class="info-value" title="${hero.groupaffiliation}">${hero.groupaffiliation || 'N/A'}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="power-stats-section">
+                <p class="power-stats-title">Power Stats</p>
+                ${renderPowerBars(hero.stats)}
+            </div>
+        </div>`;
+    };
+
+    const renderChart = (hero) => {
+        if (myChart) {
+            myChart.destroy();
+            myChart = null;
+        }
+
+        chartWrapper.html(`
+            <div class="chart-section">
+                <p class="chart-title">Radar de poder — ${hero.name}</p>
+                <canvas id="powerStatsChart"></canvas>
+            </div>`);
+
+        const labels = Object.keys(hero.stats).map(k => k.charAt(0).toUpperCase() + k.slice(1));
+        const values = Object.values(hero.stats).map(parseStatValue);
+
+        const ctx = document.getElementById('powerStatsChart').getContext('2d');
+        myChart = new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels,
+                datasets: [{
+                    label: hero.name,
+                    data: values,
+                    backgroundColor: 'rgba(230, 57, 70, 0.18)',
+                    borderColor: '#e63946',
+                    pointBackgroundColor: '#f4d03f',
+                    pointBorderColor: '#fff',
+                    pointRadius: 4,
+                    borderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    r: {
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            stepSize: 25,
+                            color: '#8892b0',
+                            backdropColor: 'transparent',
+                            font: { size: 9 }
+                        },
+                        grid: { color: 'rgba(255,255,255,0.08)' },
+                        angleLines: { color: 'rgba(255,255,255,0.08)' },
+                        pointLabels: {
+                            color: '#e0e0e0',
+                            font: { size: 11, weight: '500' }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { labels: { color: '#e0e0e0', font: { size: 12 } } },
+                    title: { display: false }
+                }
+            }
+        });
     };
 
     const getHero = (id) => {
+        heroResult.html(`
+            <div class="loading-spinner">
+                <div class="spinner-border" role="status"></div>
+                <span>Buscando héroe...</span>
+            </div>`);
+        chartWrapper.empty();
+
         $.ajax({
             url: `https://www.superheroapi.com/api.php/4905856019427443/${id}`,
             method: 'GET',
             success(data) {
-                console.log(data);
-
-                const myHero = {
+                if (data.response === 'error') {
+                    heroResult.html(`<div class="error-msg">No se encontró el héroe con ID ${id}.</div>`);
+                    return;
+                }
+                const hero = {
                     image: data.image.url,
                     publisher: data.biography.publisher,
                     occupation: data.work.occupation,
@@ -50,73 +183,12 @@ $(document).ready(function(){
                     groupaffiliation: data.connections['group-affiliation'],
                     stats: data.powerstats
                 };
-
-                
-                const labels = Object.keys(myHero.stats);
-                const values = Object.values(myHero.stats);
-
-                
-                if (myChart !== null) {
-                    myChart.destroy();
-                }
-
-               
-                const ctx = document.getElementById('powerStatsChart').getContext('2d');
-                myChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Power Stats',
-                            data: values,
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.5)',
-                                'rgba(54, 162, 235, 0.5)',
-                                'rgba(255, 206, 86, 0.5)',
-                                'rgba(75, 192, 192, 0.5)',
-                                'rgba(153, 102, 255, 0.5)',
-                                'rgba(255, 159, 64, 0.5)'
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        plugins: {
-                            title: {
-                                display: true,
-                                text: 'Power Stats del Héroe'
-                            }
-                        }
-                    }
-                });
-
-                
-                heroResult.html(`<div class="card">
-                    <img src="${myHero.image}" alt="" class="card-img-top" style="max-width: 50%; height: auto;">
-                    <div class="card-body">
-                        <h5>Nombre: ${myHero.name}</h5>
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">Publicado por: ${myHero.publisher}</li>
-                        <li class="list-group-item">Ocupación: ${myHero.occupation}</li>
-                        <li class="list-group-item">Primera publicación: ${myHero.firstappearance}</li>
-                        <li class="list-group-item">Altura: ${myHero.height}</li>
-                        <li class="list-group-item">Peso: ${myHero.weight}</li>
-                        <li class="list-group-item">Alianza: ${myHero.groupaffiliation}</li>
-                    </ul>
-                </div>`);
-
+                heroResult.html(renderCard(hero));
+                renderChart(hero);
             },
             error(xhr, status, error) {
-                console.error('Error al obtener datos de la API:', error);
+                heroResult.html(`<div class="error-msg">Error al conectar con la API. Intente nuevamente.</div>`);
+                console.error('API error:', error);
             }
         });
     };

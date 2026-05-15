@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Aron Suy">
-    <meta name="description" content="busqueda de heroes">
+    <meta name="description" content="Busqueda de superhéroes">
     <meta name="keywords" content="superhero, busqueda">
     <title>Superhero</title>
     <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
@@ -15,40 +15,35 @@
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg bg-gray navbar-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand " href="#">
-                <img src="./assets/img/sh2.jpg" alt="superhero" height="40">&nbsp;Superhero
+            <a class="navbar-brand" href="#">
+                <img src="./assets/img/sh2.jpg" alt="superhero" height="36">&nbsp;Superhero
             </a>
         </div>
     </nav>
-    <img src="./assets/img/sh1.jpg" alt="Superhero 1" class="center" />
+
+    <img src="./assets/img/sh1.jpg" alt="Superhero banner" class="hero-banner">
 
     <main class="container">
-        <h1>Encuentra tu Superhero</h1>
-        <section>
-            <label for="heroNumber" class="form-label">Ingresa el número del Superhero a buscar</label>
-            <form id="heroForm" class="mb-5">
-                <input type="number" placeholder="" class="form-control mb-2" id="heroNumber">
-                <div class="valid-feedback mb-2">
-                    Superhero encontrado!
-                </div>
-                <div class="invalid-feedback mb-2">
-                    Ingrese solo números mayores a 0 y menores o iguales a 731.
-                </div>
-                <button class="btn btn-primary" type="submit">Buscar</button>
+        <h1>Encuentra tu Superhéroe</h1>
+
+        <section class="search-section">
+            <label for="heroNumber" class="form-label">Ingresa el número del héroe (1 – 731)</label>
+            <form id="heroForm" class="mb-0">
+                <input type="number" class="form-control mb-2" id="heroNumber" min="1" max="731" placeholder="Ej: 70">
+                <div class="valid-feedback mb-2">¡Superhéroe encontrado!</div>
+                <div class="invalid-feedback mb-2">Ingresa un número entre 1 y 731.</div>
+                <button class="btn btn-hero" type="submit">Buscar</button>
             </form>
         </section>
 
-        <section class="row">
-            <article class="col-12 col-md-6" id="heroResult">     
-            </article>
-            <article class="col-12 col-md-6">
-                <canvas id="powerStatsChart" class="chart"></canvas>
-            </article>
+        <section class="row g-4">
+            <article class="col-12 col-md-6" id="heroResult"></article>
+            <article class="col-12 col-md-6" id="chartWrapper"></article>
         </section>
-
     </main>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
